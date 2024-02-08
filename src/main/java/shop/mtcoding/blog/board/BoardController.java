@@ -14,11 +14,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @Controller
 public class BoardController {
+
     private HttpSession session;
     private final BoardRepository boardRepository; // DI
 
-    @GetMapping("/")
-    public String index(HttpServletRequest request) {
+    // http://localhost:8080?page=0
+    @GetMapping({"/", "/board"})
+    public String index(HttpServletRequest request, @RequestParam(defaultValue = "0") int page) {
         //System.out.println("페이지: " +page);
         List<Board> boardList = boardRepository.findAll();
         request.setAttribute("boardList", boardList); // ("key", value)
@@ -27,26 +29,55 @@ public class BoardController {
 
     @GetMapping("/board/saveForm")
     public String saveForm() {
+
+
         return "board/saveForm";
     }
 
     @GetMapping("/board/{id}/updateForm")
-    public String updateForm(@PathVariable int id) {
+    public String updateForm(@PathVariable int id, HttpServletRequest request) {
+
+
+        Board board = boardRepository.findById(id);
+        if (board.getUsername() == null) {
+            request.setAttribute("status", 403);
+            request.setAttribute("msg", "게시글을 수정할 권한이 없습니다");
+            return "error/40x";
+        }
+
+        request.setAttribute("board", board);
+
         return "board/updateForm";
     }
 
+
     @PostMapping("/board/save")
-    public String save(){
+    public String save(BoardRequest.SaveDTO requestDTO, HttpServletRequest request){
+        // 바디 데이터 확인 및 유효성 검사
+        System.out.println(requestDTO);
+
+        if(requestDTO.getTitle().length() > 20 || requestDTO.getContent().length() > 20){
+            request.setAttribute("status", 400);
+            request.setAttribute("msg", "제목과 내용은 20자를 넘어갈 수 없습니다");
+            return "error/40x"; // BadRequest
+        }
+
+        boardRepository.save(requestDTO);
+
         return "redirect:/";
     }
 
     @PostMapping("/board/{id}/update")
-    public String update(@PathVariable int id){
+    public String update(@PathVariable int id, BoardRequest.UpdateDTO requestDTO){
+
+        boardRepository.update(requestDTO, id);
+
         return "redirect:/";
     }
 
     @PostMapping("/board/{id}/delete")
-    public String delete(@PathVariable int id){
+    public String delete(@PathVariable int id, HttpServletRequest request){
+
         return "redirect:/";
     }
 }
