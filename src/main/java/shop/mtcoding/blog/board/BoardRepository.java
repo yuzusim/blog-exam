@@ -40,7 +40,7 @@ public class BoardRepository {
 
     @Transactional
     public void update(BoardRequest.UpdateDTO requestDTO, int id) {
-        //  Query query = em.createNativeQuery("update board_tb set title =?, content =?, username = ?, where id =?, now())");
+      //  Query query = em.createNativeQuery("update board_tb set title =?, content =?, username = ?, where id =?, now())");
         Query query = em.createNativeQuery("update board_tb set title = ?, content = ?, username = ? where id = ?");
         query.setParameter(1, requestDTO.getTitle());
         query.setParameter(2, requestDTO.getContent());
@@ -51,4 +51,10 @@ public class BoardRepository {
     }
 
 
+    @Transactional
+    public void deleteById(int id) {
+        Query query = em.createNativeQuery("delete from board_tb where id = ?");
+        query.setParameter(1, id);
+        query.executeUpdate();
+    }
 }

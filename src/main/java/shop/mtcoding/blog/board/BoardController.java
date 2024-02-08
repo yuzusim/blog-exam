@@ -17,10 +17,10 @@ public class BoardController {
 
     private HttpSession session;
     private final BoardRepository boardRepository; // DI
-
+//, @RequestParam(defaultValue = "0") int page
     // http://localhost:8080?page=0
     @GetMapping({"/", "/board"})
-    public String index(HttpServletRequest request, @RequestParam(defaultValue = "0") int page) {
+    public String index(HttpServletRequest request) {
         //System.out.println("페이지: " +page);
         List<Board> boardList = boardRepository.findAll();
         request.setAttribute("boardList", boardList); // ("key", value)
@@ -38,10 +38,12 @@ public class BoardController {
     public String updateForm(@PathVariable int id, HttpServletRequest request) {
 
 
+
+
         Board board = boardRepository.findById(id);
         if (board.getUsername() == null) {
-            request.setAttribute("status", 403);
-            request.setAttribute("msg", "게시글을 수정할 권한이 없습니다");
+            request.setAttribute("status", 400);
+            request.setAttribute("msg", "제목과 내용은 20자를 넘어갈 수 없습니다");
             return "error/40x";
         }
 
@@ -68,7 +70,15 @@ public class BoardController {
     }
 
     @PostMapping("/board/{id}/update")
-    public String update(@PathVariable int id, BoardRequest.UpdateDTO requestDTO){
+    public String update(@PathVariable int id, BoardRequest.UpdateDTO requestDTO, HttpServletRequest request){
+        // 바디 데이터 확인 및 유효성 검사
+        System.out.println(requestDTO);
+
+        if(requestDTO.getTitle().length() > 20 || requestDTO.getContent().length() > 20){
+            request.setAttribute("status", 400);
+            request.setAttribute("msg", "제목과 내용은 20자를 넘어갈 수 없습니다");
+            return "error/40x"; // BadRequest
+        }
 
         boardRepository.update(requestDTO, id);
 
@@ -77,7 +87,9 @@ public class BoardController {
 
     @PostMapping("/board/{id}/delete")
     public String delete(@PathVariable int id, HttpServletRequest request){
+        Board board = boardRepository.findById(id);
 
+        boardRepository.deleteById(id);
         return "redirect:/";
     }
 }
