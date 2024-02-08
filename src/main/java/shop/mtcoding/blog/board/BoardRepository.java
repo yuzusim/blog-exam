@@ -14,9 +14,26 @@ public class BoardRepository {
 
     private final EntityManager em;
 
-    public List<Board> findAll(){
-        Query query = em.createNativeQuery("select * from board_tb order by id desc", Board.class);
-        return query.getResultList();
+    public List<Board> findAll(int page){
+        final int COUNT = 3;
+        int value = page*COUNT;
+
+        Query query = em.createNativeQuery("select * from board_tb order by id desc limit ?,?", Board.class);
+
+        query.setParameter(1, value);
+        query.setParameter(2, COUNT);
+
+        List<Board> boardList = query.getResultList(); //여러건
+        return boardList;
+    }
+
+    public int totalCount(){ // 모든 걸 다 조회
+
+        Query query = em.createNativeQuery("select count(*) from board_tb");
+
+        int count= ((Number)query.getSingleResult()).intValue();
+        System.out.println("count : "+count);
+        return count;
     }
 
     public Board findById(int id) {
@@ -25,6 +42,7 @@ public class BoardRepository {
 
         Board board = (Board) query.getSingleResult();
         return board;
+
     }
 
     @Transactional

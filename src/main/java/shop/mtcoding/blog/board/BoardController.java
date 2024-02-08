@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import shop.mtcoding.blog._core.PagingUtil;
 
 import java.util.List;
 
@@ -17,28 +18,37 @@ public class BoardController {
 
     private HttpSession session;
     private final BoardRepository boardRepository; // DI
-//, @RequestParam(defaultValue = "0") int page
+
     // http://localhost:8080?page=0
     @GetMapping({"/", "/board"})
-    public String index(HttpServletRequest request) {
+    public String index(HttpServletRequest request, @RequestParam(defaultValue = "0") int page) {
         //System.out.println("페이지: " +page);
-        List<Board> boardList = boardRepository.findAll();
+        List<Board> boardList = boardRepository.findAll(page);
         request.setAttribute("boardList", boardList); // ("key", value)
+
+        int currentPage = page;
+        int nextPage = currentPage+1;
+        int prevPage = currentPage-1;
+        request.setAttribute("nextPage", nextPage);
+        request.setAttribute("prevPage", prevPage);
+
+        boolean first = PagingUtil.isFirst(currentPage);
+        boolean last = PagingUtil.isLast(currentPage,boardRepository.totalCount());
+
+        request.setAttribute("first", first);
+        request.setAttribute("last", last);
+
+
         return "index";
     }
 
     @GetMapping("/board/saveForm")
     public String saveForm() {
-
-
         return "board/saveForm";
     }
 
     @GetMapping("/board/{id}/updateForm")
     public String updateForm(@PathVariable int id, HttpServletRequest request) {
-
-
-
 
         Board board = boardRepository.findById(id);
         if (board.getUsername() == null) {
