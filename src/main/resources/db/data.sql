@@ -11,7 +11,6 @@ insert into board_tb(title, content, username) values('제목5', '내용5', '홍
 insert into board_tb(title, content, username) values('제목5', '내용5', '홍길동');
 insert into board_tb(title, content, username) values('제목5', '내용5', '홍길동');
 insert into board_tb(title, content, username) values('제목5', '내용5', '홍길동');
-insert into board_tb(title, content, username) values('제목5', '내용5', '홍길동');
-insert into board_tb(title, content, username) values('제목5', '내용5', '홍길동');
+
 
 
